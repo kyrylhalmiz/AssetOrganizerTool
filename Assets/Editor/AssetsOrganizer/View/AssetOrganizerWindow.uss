@@ -54,3 +54,7 @@
 .toolbar-spacer {
     flex-grow: 1;
 }
+
+.category-filter {
+    min-width: 120px;
+}

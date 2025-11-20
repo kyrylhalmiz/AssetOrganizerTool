@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Editor.AssetsOrganizer.Model;
 using Editor.AssetsOrganizer.ViewModel;
 using UnityEditor;
@@ -46,8 +48,19 @@ namespace Editor.AssetsOrganizer.EditorWindow
             _progressBar = root.Q<ProgressBar>("progressBar");
             _detailsContainer = root.Q<ScrollView>("detailsContainer");
             var searchField = root.Q<ToolbarSearchField>("searchField");
-            var filter = root.Q<EnumField>("filterCategory");
-            filter.Init(ItemCategory.None);
+            
+            var filterContainer = root.Q<VisualElement>("filterCategoryContainer");
+            
+            List<string> options = new List<string> { "All" };
+
+            options.AddRange(System.Enum.GetNames(typeof(ItemCategory)));
+
+            var popup = new PopupField<string>("Category", options, 0)
+            {
+                name = "filterCategoryPopup"
+            };
+
+            filterContainer.Add(popup);
 
             var btnScan = root.Q<ToolbarButton>("btnScan");
             var btnCreate = root.Q<ToolbarButton>("btnCreate");
@@ -74,9 +87,13 @@ namespace Editor.AssetsOrganizer.EditorWindow
                 RefreshList();
             });
             
-            filter.RegisterValueChangedCallback(evt =>
+            popup.RegisterValueChangedCallback(evt =>
             {
-                _vm.FilterCategory.Value = (ItemCategory)evt.newValue;
+                if (evt.newValue == "All")
+                    _vm.FilterCategory.Value = null;
+                else
+                    _vm.FilterCategory.Value = Enum.Parse<ItemCategory>(evt.newValue);
+
                 RefreshList();
             });
             
@@ -86,6 +103,14 @@ namespace Editor.AssetsOrganizer.EditorWindow
         private void RefreshList()
         {
             var filtered = _vm.GetFilteredItems();
+            
+            if (_vm.SelectedItem.Value != null && !filtered.Contains(_vm.SelectedItem.Value))
+            {
+                _listView.SetSelectionWithoutNotify(new int[]{}); // Clears selection
+                _vm.Select(null);
+                _detailsContainer.Clear();
+            }
+
             _listView.itemsSource = filtered;
             _listView.Rebuild();
         }

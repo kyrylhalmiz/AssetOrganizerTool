@@ -10,7 +10,7 @@
             <ui:VisualElement class="toolbar-spacer"/>
 
             <uie:ToolbarSearchField name="searchField"/>
-            <ui:EnumField name="filterCategory" class="category-filter"/>
+            <ui:VisualElement name="filterCategoryContainer" class="category-filter" />
         </uie:Toolbar>
         <ui:TwoPaneSplitView fixedPaneIndex="0" fixedPaneInitialDimension="280" name="splitView">
             <ui:VisualElement name="listPane" class="left-pane">
