@@ -47,7 +47,7 @@ namespace Editor.AssetsOrganizer.EditorWindow
                 "Assets/Editor/AssetsOrganizer/View/AssetOrganizerWindow.uss"));
 
             rootVisualElement.Add(root);
-
+            rootVisualElement.RegisterCallback<KeyDownEvent>(OnKeyDown);
             _vm = new AssetOrganizerViewModel();
 
             _listView = root.Q<ListView>("itemList");
@@ -204,6 +204,72 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
             _vm.Progress.Value = 0f;
             _vm.StatusMessage.Value = "Ready";
+        }
+        
+        private void OnKeyDown(KeyDownEvent e)
+        {
+            if (!focusedWindow || focusedWindow != this)
+                return;
+            
+            // Ctrl + f - Search
+            if (e.ctrlKey && e.keyCode == KeyCode.F)
+            {
+                rootVisualElement.Q<ToolbarSearchField>("searchField")?.Focus();
+                e.StopPropagation();
+                return;
+            }
+
+            // F2 - Rename selected
+            if (e.keyCode == KeyCode.F2)
+            {
+                if (_vm.SelectedItem.Value != null)
+                    ShowRenameDialog(_vm.SelectedItem.Value);
+
+                e.StopPropagation();
+                return;
+            }
+
+            // Delete - Delete item
+            if (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace)
+            {
+                if (_vm.SelectedItem.Value != null)
+                    DeleteItem(_vm.SelectedItem.Value);
+
+                e.StopPropagation();
+                return;
+            }
+
+            // Ctrl + Shift + R - Batch rename
+            if (e.ctrlKey && e.shiftKey && e.keyCode == KeyCode.R)
+            {
+                ShowBatchRenameDialog();
+                e.StopPropagation();
+                return;
+            }
+
+            // Ctrl + Shift + C - Batch category
+            if (e.ctrlKey && e.shiftKey && e.keyCode == KeyCode.C)
+            {
+                ShowBatchCategoryDialog();
+                e.StopPropagation();
+                return;
+            }
+
+            //Ctrl + N - Create item 
+            if (e.ctrlKey && e.keyCode == KeyCode.N)
+            {
+                ShowCreateDialog();
+                e.StopPropagation();
+                return;
+            }
+
+            // Ctrl + R - Scan 
+            if (e.ctrlKey && e.keyCode == KeyCode.R)
+            {
+                _vm.ScanAssetsAsync(this);
+                e.StopPropagation();
+                return;
+            }
         }
 
         private void RefreshList()
