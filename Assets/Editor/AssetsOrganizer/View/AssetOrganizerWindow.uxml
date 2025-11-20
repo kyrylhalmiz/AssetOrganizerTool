@@ -6,6 +6,8 @@
             <uie:ToolbarButton text="Scan Items" name="btnScan"/>
             <uie:ToolbarButton text="Create Item" name="btnCreate"/>
             <uie:ToolbarButton text="Validate Selected" name="btnValidate"/>
+            <uie:ToolbarButton text="Batch Rename" name="btnBatchRename"/>
+            <uie:ToolbarButton text="Batch Category" name="btnBatchCategory"/>
 
             <ui:VisualElement class="toolbar-spacer"/>
 

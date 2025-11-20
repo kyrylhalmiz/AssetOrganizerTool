@@ -192,8 +192,25 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
             while (iterator.NextVisible(false))
             {
-                PropertyField field = new PropertyField(iterator.Copy());
+                var propCopy = iterator.Copy();
+
+                PropertyField field = new PropertyField(propCopy);
                 field.Bind(_selectedSO);
+                
+                field.RegisterValueChangeCallback(_ =>
+                {
+                    _selectedSO.ApplyModifiedProperties();
+                    RefreshList();
+                });
+                
+                field.RegisterValueChangeCallback(_ =>
+                {
+                    Undo.RecordObject(item, "Modify Game Item");
+                    _selectedSO.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(item);
+                    RefreshList();
+                });
+
                 _detailsContainer.Add(field);
             }
         }
