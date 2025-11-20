@@ -28,6 +28,7 @@ namespace Editor.AssetsOrganizer.EditorWindow
             public VisualElement icon;
             public Label title;
             public Label subtitle;
+            public int index;
         }
 
         [MenuItem("Tools/Asset Organizer Editor Tool")]
@@ -120,6 +121,8 @@ namespace Editor.AssetsOrganizer.EditorWindow
             _listView.bindItem = (element, index) =>
             {
                 var row = (RowRefs)element.userData;
+                row.index = index;
+
                 var item = (GameItemConfig)_listView.itemsSource[index];
 
                 row.title.text = item.DisplayName;
@@ -155,6 +158,31 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
                     badgeContainer.Add(badge);
                 }
+            };
+            
+            _listView.makeItem = () =>
+            {
+                var ve = rowTemplate.CloneTree();
+    
+                ve.RegisterCallback<ContextClickEvent>(evt =>
+                {
+                    var row = (RowRefs)ve.userData;
+                    if (row.index < 0) return;
+
+                    var item = (GameItemConfig)_listView.itemsSource[row.index];
+
+                    ShowContextMenu(item);
+                });
+
+                ve.userData = new RowRefs
+                {
+                    icon = ve.Q<VisualElement>("icon"),
+                    title = ve.Q<Label>("title"),
+                    subtitle = ve.Q<Label>("subtitle"),
+                    index = -1 
+                };
+
+                return ve;
             };
 
             _listView.selectionChanged += OnListSelectionChanged;
@@ -337,6 +365,87 @@ namespace Editor.AssetsOrganizer.EditorWindow
             AssetDatabase.Refresh();
             RefreshList();
         }
+        private void ShowContextMenu(GameItemConfig item)
+        {
+            var menu = new GenericMenu();
 
+            menu.AddItem(new GUIContent("Rename"), false, () => ShowRenameDialog(item));
+            menu.AddItem(new GUIContent("Duplicate"), false, () => DuplicateItem(item));
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Reveal in Project"), false, () => EditorUtility.RevealInFinder(AssetDatabase.GetAssetPath(item)));
+            menu.AddItem(new GUIContent("Ping"), false, () => EditorGUIUtility.PingObject(item));
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Delete"), false, () => DeleteItem(item));
+            menu.AddItem(new GUIContent("Move To..."), false, () => MoveItemDialog(item));
+
+            menu.ShowAsContext();
+        }
+        
+        private void ShowRenameDialog(GameItemConfig item)
+        {
+            EditorInputWindow.Show("Rename Item", newName =>
+            {
+                Undo.RecordObject(item, "Rename Item");
+
+                string path = AssetDatabase.GetAssetPath(item);
+                AssetDatabase.RenameAsset(path, newName);
+
+                item.DisplayName = newName;
+
+                EditorUtility.SetDirty(item);
+                AssetDatabase.SaveAssets();
+
+                RefreshList();
+            });
+        }
+        
+        private void DuplicateItem(GameItemConfig item)
+        {
+            string path = AssetDatabase.GetAssetPath(item);
+
+            string newPath = AssetDatabase.GenerateUniqueAssetPath(path.Replace(".asset", "_Copy.asset"));
+            AssetDatabase.CopyAsset(path, newPath);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            _vm.ScanAssetsAsync(this); 
+        }
+        
+        private void DeleteItem(GameItemConfig item)
+        {
+            if (!EditorUtility.DisplayDialog("Delete Item",
+                    $"Delete \"{item.DisplayName}\"?", "Delete", "Cancel"))
+                return;
+
+            string path = AssetDatabase.GetAssetPath(item);
+
+            Undo.RecordObject(item, "Delete Item");
+            AssetDatabase.DeleteAsset(path);
+
+            AssetDatabase.Refresh();
+            _vm.ScanAssetsAsync(this);
+        }
+        
+        private void MoveItemDialog(GameItemConfig item)
+        {
+            string folder = EditorUtility.OpenFolderPanel("Move Item To", "Assets", "");
+
+            if (string.IsNullOrEmpty(folder))
+                return;
+
+            folder = folder.Replace(Application.dataPath, "Assets");
+
+            string oldPath = AssetDatabase.GetAssetPath(item);
+            string fileName = System.IO.Path.GetFileName(oldPath);
+            string newPath = System.IO.Path.Combine(folder, fileName);
+
+            AssetDatabase.MoveAsset(oldPath, newPath);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            _vm.ScanAssetsAsync(this);
+        }
     }
 }
