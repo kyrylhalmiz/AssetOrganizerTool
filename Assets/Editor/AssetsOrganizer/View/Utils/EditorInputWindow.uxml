@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Editor/AssetsOrganizer/View/Utils/EditorInputWindow.uss?fileID=7433441132597879392&amp;guid=f6c1b0c006dc472418fe98764a504d8b&amp;type=3#EditorInputWindow" />
+    <ui:VisualElement class="root">
+        <ui:Label name="titleLabel" class="title-label" />
+        <ui:TextField name="inputField" label="Text:" class="text-input" />
+        <ui:VisualElement class="buttons">
+            <ui:Button name="cancelButton" text="Cancel" class="dialog-button" />
+            <ui:Button name="okButton" text="OK" class="dialog-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

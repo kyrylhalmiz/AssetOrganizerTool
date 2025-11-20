@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Editor.AssetsOrganizer.EditorWindow.Utils;
 using Editor.AssetsOrganizer.Model;
 using Editor.AssetsOrganizer.ViewModel;
 using UnityEditor;
@@ -76,11 +77,17 @@ namespace Editor.AssetsOrganizer.EditorWindow
             var btnScan = root.Q<ToolbarButton>("btnScan");
             var btnCreate = root.Q<ToolbarButton>("btnCreate");
             var btnValidate = root.Q<ToolbarButton>("btnValidate");
+            var btnBatchRename = root.Q<ToolbarButton>("btnBatchRename");
+            var btnBatchCategory = root.Q<ToolbarButton>("btnBatchCategory");
+
+
 
             // Connect commands 
             btnScan.clicked += _vm.ScanAssets;
             btnCreate.clicked += ShowCreateDialog;
             btnValidate.clicked += _vm.ValidateSelected;
+            btnBatchRename.clicked += ShowBatchRenameDialog;
+            btnBatchCategory.clicked += ShowBatchCategoryDialog;
 
             //  Bind ListView 
             _vm.Items.OnListChanged += RefreshList;
@@ -231,5 +238,91 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
             _vm.CreateNewItem(folder, itemName);
         }
+        
+        private void ShowBatchRenameDialog()
+        {
+            int choice = EditorUtility.DisplayDialogComplex(
+                "Batch Rename",
+                "Choose rename mode:",
+                "Add Prefix",
+                "Add Suffix",
+                "Cancel"
+            );
+
+            if (choice == 2) return; // Cancel
+
+            bool isPrefix = choice == 0;
+
+            EditorInputWindow.Show(
+                isPrefix ? "Enter Prefix" : "Enter Suffix",
+                (text) =>
+                {
+                    if (!string.IsNullOrEmpty(text))
+                        ApplyBatchRename(isPrefix, text);
+                });
+        }
+
+        
+        private void ShowBatchCategoryDialog()
+        {
+            var categories = Enum.GetValues(typeof(ItemCategory))
+                .Cast<ItemCategory>()
+                .ToList();
+
+            string[] catStrings = categories.Select(c => c.ToString()).ToArray();
+
+            int chosen = EditorUtility.DisplayDialogComplex(
+                "Batch Category",
+                "Choose category to apply to ALL filtered items:",
+                catStrings[0], catStrings.Length > 1 ? catStrings[1] : "", "Cancel");
+
+            if (chosen < 0 || chosen >= categories.Count)
+                return;
+
+            var selectedCategory = categories[chosen];
+
+            ApplyBatchCategory(selectedCategory);
+        }
+        
+        private void ApplyBatchRename(bool isPrefix, string text)
+        {
+            var items = _vm.GetFilteredItems();
+
+            foreach (var item in items)
+            {
+                string newName = isPrefix
+                    ? text + item.DisplayName
+                    : item.DisplayName + text;
+
+                Undo.RecordObject(item, "Batch Rename GameItems");
+
+                item.DisplayName = newName;
+                
+                string assetPath = AssetDatabase.GetAssetPath(item);
+                AssetDatabase.RenameAsset(assetPath, newName);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            RefreshList();
+        }
+        
+        private void ApplyBatchCategory(ItemCategory category)
+        {
+            var items = _vm.GetFilteredItems();
+
+            foreach (var item in items)
+            {
+                Undo.RecordObject(item, "Batch Category Apply");
+                item.Category = category;
+
+                EditorUtility.SetDirty(item);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            RefreshList();
+        }
+
     }
 }
