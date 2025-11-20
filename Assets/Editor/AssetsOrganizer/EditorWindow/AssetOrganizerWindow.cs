@@ -126,7 +126,14 @@ namespace Editor.AssetsOrganizer.EditorWindow
                 var item = (GameItemConfig)_listView.itemsSource[index];
 
                 row.title.text = item.DisplayName;
-                row.subtitle.text = $"{item.Category} • {item.Price}";
+                string path = AssetDatabase.GetAssetPath(item);
+                string filename = System.IO.Path.GetFileNameWithoutExtension(path);
+
+                bool mismatch = filename != item.DisplayName;
+
+                row.subtitle.text = mismatch
+                    ? $"{item.Category} • {item.Price} — <color=#FF6666>Filename: {filename}</color>"
+                    : $"{item.Category} • {item.Price}";
                 
                 if (item.Icon != null)
                 {
@@ -513,5 +520,6 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
             _vm.ScanAssetsAsync(this);
         }
+        
     }
 }

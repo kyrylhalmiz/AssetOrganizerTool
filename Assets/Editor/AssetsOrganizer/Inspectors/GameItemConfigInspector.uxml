@@ -1,0 +1,24 @@
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements">
+
+    <ui:VisualElement class="root">
+
+        <!-- HEADER -->
+        <ui:Label name="headerLabel" class="gi-header" text="Item Name"/>
+
+        <!-- VALIDATION BADGES -->
+        <ui:VisualElement name="badgeContainer" class="gi-badge-container" />
+
+        <!-- PROPERTIES -->
+        <ui:VisualElement name="propertiesContainer" class="gi-properties"/>
+
+        <!-- PREVIEW -->
+        <ui:Image name="previewImage" class="gi-preview" />
+
+        <!-- BUTTON (fixed) -->
+        <ui:Button name="openInOrganizerBtn" text="Open Asset Organizer" class="gi-button" />
+
+    </ui:VisualElement>
+
+</ui:UXML>

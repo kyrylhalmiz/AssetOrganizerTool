@@ -1,0 +1,43 @@
+.root {
+    padding: 6px;
+}
+
+.gi-header {
+    unity-font-style: bold;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.gi-badge-container {
+    flex-direction: row;
+    margin-bottom: 6px;
+}
+
+.gi-badge {
+    padding: 2px 6px;
+    unity-font-style: bold;
+    font-size: 10px;
+    border-radius: 4px;
+    margin-right: 4px;
+    color: white;
+}
+
+.gi-badge-error {
+    background-color: #8a2f2f;
+}
+
+.gi-badge-warning {
+    background-color: #8a6f2f;
+}
+
+.gi-preview {
+    height: 80px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    scale-mode: contain;
+}
+
+.gi-button {
+    margin-top: 6px;
+    height: 26px;
+}

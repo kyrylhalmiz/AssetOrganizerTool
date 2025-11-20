@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NewItem
   m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AssetsOrganizer.Model.GameItemConfig
   itemId: 560d2f80-d12a-4d01-bada-02dcfbdfe382
-  displayName: Test
+  displayName: Test1
   description: 
   category: 0
   price: 0
