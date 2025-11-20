@@ -96,6 +96,31 @@
     border-left: 3px solid #5fa3ff;
 }
 
+.item-row-badge-container {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.item-badge {
+    width: 14px;
+    height: 14px;
+    margin-left: 6px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.9;
+}
+
+.item-badge-error {
+    background-image: resource("console.erroricon");
+}
+
+.item-badge-warning {
+    background-image: resource("console.warnicon");
+}
+
 /* Icon */
 .item-row-icon {
     width: 20px;

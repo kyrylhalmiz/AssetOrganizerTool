@@ -124,14 +124,37 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
                 row.title.text = item.DisplayName;
                 row.subtitle.text = $"{item.Category} • {item.Price}";
+                
+                if (item.Icon != null)
+                {
+                    var tex = AssetPreview.GetAssetPreview(item.Icon);
+                    if (tex != null)
+                        row.icon.style.backgroundImage = new StyleBackground(tex);
+                }
+                else
+                {
+                    row.icon.style.backgroundImage = null;
+                }
+                
+                var badgeContainer = element.Q<VisualElement>("badgeContainer");
+                badgeContainer.Clear();
 
-                Texture2D tex = item.Icon != null
-                    ? AssetPreview.GetAssetPreview(item.Icon)
-                    : EditorGUIUtility.IconContent("Prefab Icon").image as Texture2D;
+                var results = GameItemValidator.Validate(item);
 
-                row.icon.style.backgroundImage = tex != null
-                    ? new StyleBackground(tex)
-                    : null;
+                foreach (var r in results)
+                {
+                    var badge = new VisualElement();
+                    badge.AddToClassList("item-badge");
+
+                    if (r.Severity == ValidationSeverity.Error)
+                        badge.AddToClassList("item-badge-error");
+                    else if (r.Severity == ValidationSeverity.Warning)
+                        badge.AddToClassList("item-badge-warning");
+
+                    badge.tooltip = r.Message;
+
+                    badgeContainer.Add(badge);
+                }
             };
 
             _listView.selectionChanged += OnListSelectionChanged;
