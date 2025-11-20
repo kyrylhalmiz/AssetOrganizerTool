@@ -1,0 +1,52 @@
+.root {
+    flex-grow: 1;
+    padding: 4px;
+}
+
+.toolbar {
+    margin-bottom: 4px;
+}
+
+.left-pane {
+    padding: 6px;
+    border-right: 1px solid #393939;
+}
+
+.right-pane {
+    padding: 10px;
+}
+
+.header {
+    unity-font-style: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.item-list {
+    flex-grow: 1;
+    height: 100%;
+    border: 1px solid #2e2e2e;
+}
+
+.details-container {
+    flex-grow: 1;
+    padding: 6px;
+}
+
+.status-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 4px;
+    margin-top: 8px;
+
+    border-top: 1px solid #3a3a3a;
+}
+
+.status-text {
+    color: #ccc;
+}
+
+.progress-bar {
+    width: 150px;
+    height: 12px;
+}
