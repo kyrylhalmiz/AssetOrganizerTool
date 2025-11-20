@@ -1,4 +1,6 @@
-﻿using Editor.AssetsOrganizer.Model;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Editor.AssetsOrganizer.Model;
 using Editor.AssetsOrganizer.Services;
 using Editor.AssetsOrganizer.ViewModel.Observables;
 using UnityEditor;
@@ -11,6 +13,9 @@ namespace Editor.AssetsOrganizer.ViewModel
         public Observable<GameItemConfig> SelectedItem { get; } = new(null);
         public Observable<string> StatusMessage { get; } = new("");
         public Observable<float> Progress { get; } = new(0f);
+        public Observable<string> SearchQuery { get; } = new("");
+        public Observable<ItemCategory?> FilterCategory { get; } = new(null);
+
 
         private readonly AssetScanner _scanner;
 
@@ -67,5 +72,27 @@ namespace Editor.AssetsOrganizer.ViewModel
                 StatusMessage.Value = "Item is valid.";
             }
         }
+        
+        public List<GameItemConfig> GetFilteredItems()
+        {
+            IEnumerable<GameItemConfig> list = Items.Items;
+
+            if (!string.IsNullOrEmpty(SearchQuery.Value))
+            {
+                string q = SearchQuery.Value.ToLower();
+                list = list.Where(i =>
+                    i.DisplayName?.ToLower().Contains(q) == true ||
+                    i.Description?.ToLower().Contains(q) == true);
+            }
+
+            if (FilterCategory.Value.HasValue)
+            {
+                var cat = FilterCategory.Value.Value;
+                list = list.Where(i => i.Category == cat);
+            }
+
+            return list.ToList();
+        }
+
     }
 }

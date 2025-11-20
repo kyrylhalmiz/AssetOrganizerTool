@@ -2,9 +2,15 @@
     <Style src="project://database/Assets/Editor/AssetsOrganizer/View/AssetOrganizerWindow.uss?fileID=7433441132597879392&amp;guid=810a2763a1a613e4e91b4273ea722d05&amp;type=3#AssetOrganizerWindow" />
     <ui:VisualElement class="root">
         <uie:Toolbar class="toolbar">
-            <uie:ToolbarButton text="Scan Items" name="btnScan" />
-            <uie:ToolbarButton text="Create Item" name="btnCreate" />
-            <uie:ToolbarButton text="Validate Selected" name="btnValidate" />
+
+            <uie:ToolbarButton text="Scan Items" name="btnScan"/>
+            <uie:ToolbarButton text="Create Item" name="btnCreate"/>
+            <uie:ToolbarButton text="Validate Selected" name="btnValidate"/>
+
+            <ui:VisualElement class="toolbar-spacer"/>
+
+            <uie:ToolbarSearchField name="searchField"/>
+            <ui:EnumField name="filterCategory" class="category-filter"/>
         </uie:Toolbar>
         <ui:TwoPaneSplitView fixedPaneIndex="0" fixedPaneInitialDimension="280" name="splitView">
             <ui:VisualElement name="listPane" class="left-pane">

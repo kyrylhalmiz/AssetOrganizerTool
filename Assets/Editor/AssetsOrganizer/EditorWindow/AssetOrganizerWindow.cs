@@ -45,6 +45,9 @@ namespace Editor.AssetsOrganizer.EditorWindow
             _statusLabel = root.Q<Label>("lblStatus");
             _progressBar = root.Q<ProgressBar>("progressBar");
             _detailsContainer = root.Q<ScrollView>("detailsContainer");
+            var searchField = root.Q<ToolbarSearchField>("searchField");
+            var filter = root.Q<EnumField>("filterCategory");
+            filter.Init(ItemCategory.None);
 
             var btnScan = root.Q<ToolbarButton>("btnScan");
             var btnCreate = root.Q<ToolbarButton>("btnCreate");
@@ -65,12 +68,25 @@ namespace Editor.AssetsOrganizer.EditorWindow
             // Bind progress 
             _vm.Progress.OnChanged += p => _progressBar.value = p;
             
+            searchField.RegisterValueChangedCallback(evt =>
+            {
+                _vm.SearchQuery.Value = evt.newValue;
+                RefreshList();
+            });
+            
+            filter.RegisterValueChangedCallback(evt =>
+            {
+                _vm.FilterCategory.Value = (ItemCategory)evt.newValue;
+                RefreshList();
+            });
+            
             _vm.StatusMessage.Value = "Ready.";
         }
 
         private void RefreshList()
         {
-            _listView.itemsSource = _vm.Items.Items;
+            var filtered = _vm.GetFilteredItems();
+            _listView.itemsSource = filtered;
             _listView.Rebuild();
         }
 
