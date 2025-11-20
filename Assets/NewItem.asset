@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23e2126e22e743feb801fdcc482a9c88, type: 3}
-  m_Name: Item1
+  m_Name: NewItem
   m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AssetsOrganizer.Model.GameItemConfig
-  itemId: 87e34612-4309-4dc5-b956-4279593d5f47
-  displayName: Item1
+  itemId: 560d2f80-d12a-4d01-bada-02dcfbdfe382
+  displayName: 
   description: 
   category: 0
   price: 0
