@@ -58,3 +58,44 @@
 .category-filter {
     min-width: 120px;
 }
+
+
+.item-row {
+    flex-direction: row;
+    padding: 4px 6px;
+    align-items: center;
+    min-height: 32px;
+    border-bottom: 1px solid #2e2e2e;
+}
+
+.item-row:hover {
+    background-color: #2c2c2c;
+}
+
+.unity-list-view__item--selected .item-row {
+    background-color: #3d4f6b;
+}
+
+.item-row-icon {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-right: 8px;
+}
+
+.item-row-content {
+    flex-direction: column;
+}
+
+.item-row-title {
+    unity-font-style: bold;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.item-row-subtitle {
+    font-size: 11px;
+    color: #b5b5b5;
+}

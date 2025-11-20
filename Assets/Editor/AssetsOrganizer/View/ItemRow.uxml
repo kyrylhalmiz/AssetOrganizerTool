@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+
+    <ui:VisualElement class="item-row">
+
+        <ui:VisualElement name="icon" class="item-row-icon"/>
+
+        <ui:VisualElement class="item-row-content">
+            <ui:Label name="title" class="item-row-title"/>
+            <ui:Label name="subtitle" class="item-row-subtitle"/>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

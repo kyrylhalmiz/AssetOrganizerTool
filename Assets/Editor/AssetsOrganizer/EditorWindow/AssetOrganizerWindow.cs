@@ -10,6 +10,7 @@ using UnityEngine.UIElements;
 
 namespace Editor.AssetsOrganizer.EditorWindow
 {
+    
     public class AssetOrganizerWindow : UnityEditor.EditorWindow
     {
         private AssetOrganizerViewModel _vm;
@@ -20,6 +21,13 @@ namespace Editor.AssetsOrganizer.EditorWindow
         private ScrollView _detailsContainer;
 
         private SerializedObject _selectedSO;
+        
+        private class RowRefs
+        {
+            public VisualElement icon;
+            public Label title;
+            public Label subtitle;
+        }
 
         [MenuItem("Tools/Asset Organizer Editor Tool")]
         public static void ShowWindow()
@@ -61,6 +69,9 @@ namespace Editor.AssetsOrganizer.EditorWindow
             };
 
             filterContainer.Add(popup);
+            
+            var rowTemplate = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/Editor/AssetsOrganizer/View/ItemRow.uxml");
 
             var btnScan = root.Q<ToolbarButton>("btnScan");
             var btnCreate = root.Q<ToolbarButton>("btnCreate");
@@ -96,6 +107,45 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
                 RefreshList();
             });
+            
+            _listView.makeItem = () =>
+            {
+                var ve = rowTemplate.CloneTree();
+                ve.userData = new RowRefs
+                {
+                    icon = ve.Q<VisualElement>("icon"),
+                    title = ve.Q<Label>("title"),
+                    subtitle = ve.Q<Label>("subtitle")
+                };
+                return ve;
+            };
+
+            _listView.bindItem = (element, index) =>
+            {
+                var row = (RowRefs)element.userData;
+                var item = (GameItemConfig)_listView.itemsSource[index];
+                
+                row.title.text = item.DisplayName;
+                
+                row.subtitle.text = $"{item.Category} • {item.Price}";
+                
+                if (item.Icon != null)
+                {
+                    var tex = AssetPreview.GetAssetPreview(item.Icon);
+                    if (tex != null)
+                    {
+                        row.icon.style.backgroundImage = new StyleBackground(tex);
+                    }
+                }
+                else
+                {
+                    row.icon.style.backgroundImage = null;
+                }
+            };
+            
+            _listView.selectionChanged += OnListSelectionChanged;
+            
+            _listView.fixedItemHeight = 36;
             
             _vm.StatusMessage.Value = "Ready.";
         }
