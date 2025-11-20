@@ -39,7 +39,6 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
         private void CreateGUI()
         {
-            // Load UXML/USS
             var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/Editor/AssetsOrganizer/View/AssetOrganizerWindow.uxml");
             var root = uxml.CloneTree();
@@ -48,31 +47,17 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
             rootVisualElement.Add(root);
 
-            // ViewModel
             _vm = new AssetOrganizerViewModel();
 
-            // Query UI Elements 
             _listView = root.Q<ListView>("itemList");
             _statusLabel = root.Q<Label>("lblStatus");
             _progressBar = root.Q<ProgressBar>("progressBar");
             _detailsContainer = root.Q<ScrollView>("detailsContainer");
+
             var searchField = root.Q<ToolbarSearchField>("searchField");
-            
             var filterContainer = root.Q<VisualElement>("filterCategoryContainer");
-            
-            List<string> options = new List<string> { "All" };
-
-            options.AddRange(System.Enum.GetNames(typeof(ItemCategory)));
-
-            var popup = new PopupField<string>("Category", options, 0)
-            {
-                name = "filterCategoryPopup"
-            };
-
-            filterContainer.Add(popup);
-            
-            var rowTemplate = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
-                "Assets/Editor/AssetsOrganizer/View/ItemRow.uxml");
+            var emptyLabel = root.Q<Label>("emptyStateLabel");
+            var loadingOverlay = root.Q<VisualElement>("loadingOverlay");
 
             var btnScan = root.Q<ToolbarButton>("btnScan");
             var btnCreate = root.Q<ToolbarButton>("btnCreate");
@@ -80,41 +65,46 @@ namespace Editor.AssetsOrganizer.EditorWindow
             var btnBatchRename = root.Q<ToolbarButton>("btnBatchRename");
             var btnBatchCategory = root.Q<ToolbarButton>("btnBatchCategory");
 
+            var rowTemplate = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/Editor/AssetsOrganizer/View/ItemRow.uxml");
 
+            // Filter dropdown
+            List<string> options = new List<string>() { "All" };
+            options.AddRange(Enum.GetNames(typeof(ItemCategory)));
 
-            // Connect commands 
-            btnScan.clicked += () => _vm.ScanAssetsAsync(this);
+            var popup = new PopupField<string>("Category", options, 0);
+            filterContainer.Add(popup);
+
+            popup.RegisterValueChangedCallback(evt =>
+            {
+                _vm.FilterCategory.Value = evt.newValue == "All"
+                    ? null
+                    : Enum.Parse<ItemCategory>(evt.newValue);
+
+                RefreshList();
+            });
+
+            // Button callbacks
+            btnScan.clicked += () =>
+            {
+                loadingOverlay.style.display = DisplayStyle.Flex;
+                _vm.ScanAssetsAsync(this);
+            };
+
             btnCreate.clicked += ShowCreateDialog;
             btnValidate.clicked += _vm.ValidateSelected;
             btnBatchRename.clicked += ShowBatchRenameDialog;
             btnBatchCategory.clicked += ShowBatchCategoryDialog;
 
-            //  Bind ListView 
-            _vm.Items.OnListChanged += RefreshList;
-            _listView.selectionChanged += OnListSelectionChanged;
-
-            // Bind status text 
-            _vm.StatusMessage.OnChanged += s => _statusLabel.text = s;
-
-            // Bind progress 
-            _vm.Progress.OnChanged += p => _progressBar.value = p;
-            
+            // Search
             searchField.RegisterValueChangedCallback(evt =>
             {
                 _vm.SearchQuery.Value = evt.newValue;
                 RefreshList();
             });
-            
-            popup.RegisterValueChangedCallback(evt =>
-            {
-                if (evt.newValue == "All")
-                    _vm.FilterCategory.Value = null;
-                else
-                    _vm.FilterCategory.Value = Enum.Parse<ItemCategory>(evt.newValue);
 
-                RefreshList();
-            });
-            
+            // ListView Template
+            _listView.fixedItemHeight = 48;
             _listView.makeItem = () =>
             {
                 var ve = rowTemplate.CloneTree();
@@ -131,50 +121,55 @@ namespace Editor.AssetsOrganizer.EditorWindow
             {
                 var row = (RowRefs)element.userData;
                 var item = (GameItemConfig)_listView.itemsSource[index];
-                
-                row.title.text = item.DisplayName;
-                
-                row.subtitle.text = $"{item.Category} • {item.Price}";
-                
-                if (item.Icon != null)
-                {
-                    var tex = AssetPreview.GetAssetPreview(item.Icon);
-                    if (tex != null)
-                    {
-                        row.icon.style.backgroundImage = new StyleBackground(tex);
-                    }
-                }
-                else
-                {
-                    row.icon.style.backgroundImage = null;
-                }
-            };
-            
-            _listView.selectionChanged += OnListSelectionChanged;
-            
-            _listView.fixedItemHeight = 36;
-            
-            var progressBar = _progressBar;
 
-            var smoothProgress = 0f;
+                row.title.text = item.DisplayName;
+                row.subtitle.text = $"{item.Category} • {item.Price}";
+
+                Texture2D tex = item.Icon != null
+                    ? AssetPreview.GetAssetPreview(item.Icon)
+                    : EditorGUIUtility.IconContent("Prefab Icon").image as Texture2D;
+
+                row.icon.style.backgroundImage = tex != null
+                    ? new StyleBackground(tex)
+                    : null;
+            };
+
+            _listView.selectionChanged += OnListSelectionChanged;
+
+            // Smooth progress bar
+            float smoothProgress = 0f;
             root.schedule.Execute(() =>
             {
                 smoothProgress = Mathf.Lerp(smoothProgress, _vm.Progress.Value, 0.1f);
-                progressBar.value = smoothProgress;
+                _progressBar.value = smoothProgress;
+
+                if (smoothProgress >= 0.999f)
+                    loadingOverlay.style.display = DisplayStyle.None;
+
             }).Every(16);
-            
-            _vm.StatusMessage.Value = "Ready.";
+
+            _vm.Items.OnListChanged += RefreshList;
+            _vm.StatusMessage.OnChanged += msg => _statusLabel.text = msg;
+
+            _vm.Progress.Value = 0f;
+            _vm.StatusMessage.Value = "Ready";
         }
 
         private void RefreshList()
         {
+            var emptyLabel = rootVisualElement.Q<Label>("emptyStateLabel");
+
             var filtered = _vm.GetFilteredItems();
             
-            if (_vm.SelectedItem.Value != null && !filtered.Contains(_vm.SelectedItem.Value))
+            if (filtered.Count == 0)
             {
-                _listView.SetSelectionWithoutNotify(new int[]{}); // Clears selection
-                _vm.Select(null);
-                _detailsContainer.Clear();
+                emptyLabel.style.display = DisplayStyle.Flex;
+                _listView.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                emptyLabel.style.display = DisplayStyle.None;
+                _listView.style.display = DisplayStyle.Flex;
             }
 
             _listView.itemsSource = filtered;

@@ -1,6 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/Editor/AssetsOrganizer/View/AssetOrganizerWindow.uss?fileID=7433441132597879392&amp;guid=810a2763a1a613e4e91b4273ea722d05&amp;type=3#AssetOrganizerWindow" />
+
     <ui:VisualElement class="root">
+
+        <!-- Toolbar -->
         <uie:Toolbar class="toolbar">
 
             <uie:ToolbarButton text="Scan Items" name="btnScan"/>
@@ -14,19 +17,40 @@
             <uie:ToolbarSearchField name="searchField"/>
             <ui:VisualElement name="filterCategoryContainer" class="category-filter" />
         </uie:Toolbar>
+
+        <!-- Split view -->
         <ui:TwoPaneSplitView fixedPaneIndex="0" fixedPaneInitialDimension="280" name="splitView">
+
+            <!-- LEFT PANEL -->
             <ui:VisualElement name="listPane" class="left-pane">
-                <ui:Label text="Items" class="header" />
-                <ui:ListView name="itemList" selection-type="Single" show-bound-collection-size="true" virtualization-enabled="true" class="item-list" />
+
+                <ui:Label text="Items" class="header"/>
+                <ui:Label name="emptyStateLabel" text="No items found" class="empty-state"/>
+
+                <ui:ListView name="itemList"
+                             selection-type="Single"
+                             virtualization-enabled="true"
+                             class="item-list"/>
             </ui:VisualElement>
+
+            <!-- RIGHT PANEL -->
             <ui:VisualElement name="detailsPane" class="right-pane">
-                <ui:Label text="Details" class="header" />
-                <ui:ScrollView name="detailsContainer" class="details-container" />
+                <ui:Label text="Details" class="header"/>
+                <ui:ScrollView name="detailsContainer" class="details-container"/>
             </ui:VisualElement>
+
         </ui:TwoPaneSplitView>
+
+        <!-- Status Bar -->
         <ui:VisualElement class="status-bar">
-            <ui:Label name="lblStatus" text="Ready" class="status-text" />
-            <ui:ProgressBar name="progressBar" value="0" high-value="1" class="progress-bar" />
+            <ui:Label name="lblStatus" text="Ready" class="status-text"/>
+            <ui:ProgressBar name="progressBar" value="0" high-value="1" class="progress-bar"/>
         </ui:VisualElement>
+
+        <!-- Loading overlay -->
+        <ui:VisualElement name="loadingOverlay" class="loading-overlay">
+            <ui:Label text="Scanning…" class="loading-text"/>
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
