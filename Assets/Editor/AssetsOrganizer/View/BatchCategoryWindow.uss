@@ -1,0 +1,27 @@
+.root {
+    flex-direction: column;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.title-label {
+    unity-font-style: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.dropdown {
+    margin-bottom: 10px;
+}
+
+.buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.dialog-button {
+    margin-left: 6px;
+    min-width: 60px;
+}

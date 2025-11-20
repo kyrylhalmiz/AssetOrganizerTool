@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Editor/AssetsOrganizer/View/BatchCategoryWindow.uss?fileID=7433441132597879392&amp;guid=7b1d04ec27c6d0e4bbcc2a100c059fa5&amp;type=3#BatchCategoryWindow" />
+    <ui:VisualElement class="root">
+        <ui:Label name="titleLabel" class="title-label" />
+        <ui:DropdownField name="categoryDropdown" label="Category" class="dropdown" />
+        <ui:VisualElement class="buttons">
+            <ui:Button name="cancelButton" text="Cancel" class="dialog-button" />
+            <ui:Button name="okButton" text="OK" class="dialog-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

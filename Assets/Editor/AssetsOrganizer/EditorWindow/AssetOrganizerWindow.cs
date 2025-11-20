@@ -265,23 +265,10 @@ namespace Editor.AssetsOrganizer.EditorWindow
         
         private void ShowBatchCategoryDialog()
         {
-            var categories = Enum.GetValues(typeof(ItemCategory))
-                .Cast<ItemCategory>()
-                .ToList();
-
-            string[] catStrings = categories.Select(c => c.ToString()).ToArray();
-
-            int chosen = EditorUtility.DisplayDialogComplex(
-                "Batch Category",
-                "Choose category to apply to ALL filtered items:",
-                catStrings[0], catStrings.Length > 1 ? catStrings[1] : "", "Cancel");
-
-            if (chosen < 0 || chosen >= categories.Count)
-                return;
-
-            var selectedCategory = categories[chosen];
-
-            ApplyBatchCategory(selectedCategory);
+            BatchCategoryWindow.Show(
+                "Select Category",
+                ApplyBatchCategory
+            );
         }
         
         private void ApplyBatchRename(bool isPrefix, string text)
