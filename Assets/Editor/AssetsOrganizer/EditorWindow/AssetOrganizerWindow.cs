@@ -83,7 +83,7 @@ namespace Editor.AssetsOrganizer.EditorWindow
 
 
             // Connect commands 
-            btnScan.clicked += _vm.ScanAssets;
+            btnScan.clicked += () => _vm.ScanAssetsAsync(this);
             btnCreate.clicked += ShowCreateDialog;
             btnValidate.clicked += _vm.ValidateSelected;
             btnBatchRename.clicked += ShowBatchRenameDialog;
@@ -153,6 +153,15 @@ namespace Editor.AssetsOrganizer.EditorWindow
             _listView.selectionChanged += OnListSelectionChanged;
             
             _listView.fixedItemHeight = 36;
+            
+            var progressBar = _progressBar;
+
+            var smoothProgress = 0f;
+            root.schedule.Execute(() =>
+            {
+                smoothProgress = Mathf.Lerp(smoothProgress, _vm.Progress.Value, 0.1f);
+                progressBar.value = smoothProgress;
+            }).Every(16);
             
             _vm.StatusMessage.Value = "Ready.";
         }

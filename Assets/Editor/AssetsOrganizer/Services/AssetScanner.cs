@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Editor.AssetsOrganizer.Model;
 using UnityEditor;
 using UnityEngine;
@@ -26,6 +28,28 @@ namespace Editor.AssetsOrganizer.Services
             }
 
             return results;
+        }
+        
+        public IEnumerator ScanAsync(Action<float> onProgress, Action<List<GameItemConfig>> onComplete)
+        {
+            var guids = AssetDatabase.FindAssets("t:GameItemConfig");
+            var results = new List<GameItemConfig>();
+
+            int count = guids.Length;
+            for (int i = 0; i < count; i++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                var item = AssetDatabase.LoadAssetAtPath<GameItemConfig>(path);
+                if (item != null)
+                    results.Add(item);
+
+                onProgress?.Invoke((i + 1f) / count);
+                
+                if (i % 20 == 0)
+                    yield return null;
+            }
+
+            onComplete?.Invoke(results);
         }
 
         public GameItemConfig CreateItem(string folder, string name)

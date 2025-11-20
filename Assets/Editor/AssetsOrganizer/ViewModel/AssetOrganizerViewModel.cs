@@ -3,7 +3,9 @@ using System.Linq;
 using Editor.AssetsOrganizer.Model;
 using Editor.AssetsOrganizer.Services;
 using Editor.AssetsOrganizer.ViewModel.Observables;
+using Unity.EditorCoroutines.Editor;
 using UnityEditor;
+
 
 namespace Editor.AssetsOrganizer.ViewModel
 {
@@ -16,8 +18,8 @@ namespace Editor.AssetsOrganizer.ViewModel
         public Observable<string> SearchQuery { get; } = new("");
         public Observable<ItemCategory?> FilterCategory { get; } = new(null);
 
-
-        private readonly AssetScanner _scanner;
+        private EditorCoroutine _scanCoroutine;
+        private readonly AssetScanner _scanner = new AssetScanner();
 
         public AssetOrganizerViewModel()
         {
@@ -33,6 +35,27 @@ namespace Editor.AssetsOrganizer.ViewModel
 
             Items.Set(results);
             StatusMessage.Value = $"Found {results.Count} items.";
+        }
+        
+        
+        public void ScanAssetsAsync(UnityEditor.EditorWindow owner)
+        {
+            if (_scanCoroutine != null)
+                EditorCoroutineUtility.StopCoroutine(_scanCoroutine);
+
+            StatusMessage.Value = "Scanning...";
+            Progress.Value = 0f;
+
+            _scanCoroutine = EditorCoroutineUtility.StartCoroutine(
+                _scanner.ScanAsync(
+                    (p) => Progress.Value = p,
+                    (list) =>
+                    {
+                        Items.Set(list);
+                        StatusMessage.Value = $"Found {list.Count} items.";
+                        Progress.Value = 1f;
+                    }),
+                owner);
         }
 
         public void CreateNewItem(string folderPath, string name)
